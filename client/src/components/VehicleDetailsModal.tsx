@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { api } from "../helpers/axios";
 import Swal from "sweetalert2";
 import { AxiosError } from "axios";
+import { MapContainer, Marker, TileLayer } from "react-leaflet";
 
 interface VehicleDetailsModalProps {
   vehicleId: string;
@@ -116,7 +117,25 @@ export default function VehicleDetailsModal({
       style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
     >
       <div className="bg-white p-5 rounded shadow-lg w-1/4">
-        <h2 className="text-xl font-bold mb-4">Vehicle Details</h2>
+        <h2 className="text-xl font-bold">Vehicle Details</h2>
+        <MapContainer
+          center={[vehicle.attributes.latitude, vehicle.attributes.longitude]}
+          zoom={13}
+          scrollWheelZoom={true}
+          className="my-4"
+        >
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+          <Marker
+            position={[
+              vehicle.attributes.latitude,
+              vehicle.attributes.longitude,
+            ]}
+          >
+          </Marker>
+        </MapContainer>
         <p>
           <strong>Label:</strong> {vehicle.attributes.label}
         </p>
