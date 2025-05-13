@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { api } from "../helpers/axios";
 import VehicleCard from "./VehicleCard";
+import Swal from "sweetalert2";
+import { AxiosError } from "axios";
 
 interface VehicleResponse {
   data: Vehicle[];
@@ -120,6 +122,27 @@ export default function HomePage() {
         setVehicleResponse(data);
       } catch (error) {
         console.error("Error fetching vehicles:", error);
+        if (error instanceof AxiosError) {
+          if (error.status === 429) {
+            Swal.fire({
+              icon: "error",
+              title: "Error",
+              text: "Too Many Requests",
+            });
+          } else if (error.status === 404) {
+            Swal.fire({
+              icon: "error",
+              title: "Error",
+              text: "Vehicle not found",
+            });
+          }
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "Internal server error",
+          });
+        }
       } finally {
         setVehicleLoading(false);
       }

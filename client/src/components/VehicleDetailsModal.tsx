@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../helpers/axios";
+import Swal from "sweetalert2";
+import { AxiosError } from "axios";
 
 interface VehicleDetailsModalProps {
   vehicleId: string;
@@ -19,13 +21,13 @@ interface VehicleDetail {
     route: {
       data: {
         id: string;
-      }
-    }
+      };
+    };
     trip: {
       data: {
         id: string;
-      }
-    }
+      };
+    };
   };
 }
 
@@ -65,6 +67,28 @@ export default function VehicleDetailsModal({
         setVehicle(data.data);
       } catch (error) {
         console.error("Error fetching vehicle details:", error);
+        onClose();
+        if (error instanceof AxiosError) {
+          if (error.status === 429) {
+            Swal.fire({
+              icon: "error",
+              title: "Error",
+              text: "Too Many Requests",
+            });
+          } else if (error.status === 404) {
+            Swal.fire({
+              icon: "error",
+              title: "Error",
+              text: "Vehicle not found",
+            });
+          }
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "Internal server error",
+          });
+        }
       } finally {
         setLoading(false);
       }
