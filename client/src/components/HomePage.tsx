@@ -65,6 +65,10 @@ export default function HomePage() {
     offset: 0,
   });
 
+  const [vehicleLoading, setVehicleLoading] = useState(true);
+  const [routeLoading, setRouteLoading] = useState(false);
+  const [tripLoading, setTripLoading] = useState(false);
+
   function getTotalPage() {
     return Math.ceil(
       parseInt(vehicleResponse.links?.last?.split("page[offset]=")[1]) /
@@ -76,10 +80,13 @@ export default function HomePage() {
   useEffect(() => {
     async function fetchRoutes() {
       try {
+        setRouteLoading(true);
         const { data } = await api.get("/routes?page[limit]=20");
         setRoutes(data.data);
       } catch (error) {
         console.error("Error fetching routes:", error);
+      } finally {
+        setRouteLoading(false);
       }
     }
     fetchRoutes();
@@ -89,12 +96,15 @@ export default function HomePage() {
     async function fetchTrips() {
       if (!filter.routes.length) return;
       try {
+        setTripLoading(true);
         const { data } = await api.get(
           `/trips?filter[route]=${filter.routes}&page[limit]=20`
         );
         setTrips(data.data);
       } catch (error) {
         console.error("Error fetching trips:", error);
+      } finally {
+        setTripLoading(false);
       }
     }
     fetchTrips();
@@ -103,12 +113,15 @@ export default function HomePage() {
   useEffect(() => {
     async function fetchVehicles() {
       try {
+        setVehicleLoading(true);
         const { data } = await api.get(
           `/vehicles?filter[route]=${filter.routes}&fields[trip]=${filter.trips}&page[limit]=${page.limit}&page[offset]=${page.offset}`
         );
         setVehicleResponse(data);
       } catch (error) {
         console.error("Error fetching vehicles:", error);
+      } finally {
+        setVehicleLoading(false);
       }
     }
     fetchVehicles();
@@ -156,11 +169,15 @@ export default function HomePage() {
             }));
           }}
         >
-          {routes.map((route) => (
-            <option key={route.id} value={route.id}>
-              {route.id}
-            </option>
-          ))}
+          {routeLoading ? (
+            <option>Loading routes...</option>
+          ) : (
+            routes.map((route) => (
+              <option key={route.id} value={route.id}>
+                {route.id}
+              </option>
+            ))
+          )}
         </select>
       </div>
 
@@ -186,19 +203,31 @@ export default function HomePage() {
               }));
             }}
           >
-            {trips.map((trip) => (
-              <option key={trip.id} value={trip.id}>
-                {trip.id}
-              </option>
-            ))}
+            {tripLoading ? (
+              <option>Loading trips...</option>
+            ) : (
+              trips.map((trip) => (
+                <option key={trip.id} value={trip.id}>
+                  {trip.id}
+                </option>
+              ))
+            )}
           </select>
         </div>
       )}
 
       <div className="flex flex-wrap w-full gap-4 my-5">
-        {vehicleResponse.data.map((vehicle, i) => (
-          <VehicleCard key={`${vehicle.id}-${i}`} vehicle={vehicle} />
-        ))}
+        {vehicleLoading ? (
+          <div className="w-full flex justify-center items-center">
+            <span className="loading loading-spinner loading-lg"></span>
+          </div>
+        ) : vehicleResponse.data.length ? (
+          vehicleResponse.data.map((vehicle, i) => (
+            <VehicleCard key={`${vehicle.id}-${i}`} vehicle={vehicle} />
+          ))
+        ) : (
+          <p className="text-center w-full">No data available</p>
+        )}
       </div>
 
       {vehicleResponse.data.length ? (
@@ -240,9 +269,7 @@ export default function HomePage() {
           </div>
           {vehicleResponse.links?.last && <p>Total Page: {getTotalPage()}</p>}
         </div>
-      ) : (
-        <p className="text-center">No data available</p>
-      )}
+      ) : null}
     </div>
   );
 }

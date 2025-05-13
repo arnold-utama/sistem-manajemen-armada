@@ -54,21 +54,37 @@ export default function VehicleDetailsModal({
         },
       },
     },
-  })
+  });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchVehicleDetails() {
       try {
-        const {data} = await api.get(`/vehicles/${vehicleId}`);
+        setLoading(true);
+        const { data } = await api.get(`/vehicles/${vehicleId}`);
         setVehicle(data.data);
-        console.log(data.data);
-        
       } catch (error) {
         console.error("Error fetching vehicle details:", error);
+      } finally {
+        setLoading(false);
       }
     }
     fetchVehicleDetails();
-  }, [])
+  }, []);
+
+  if (loading) {
+    return (
+      <div
+        className="fixed inset-0 flex items-center justify-center z-50"
+        style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
+      >
+        <div className="bg-white p-5 rounded shadow-lg flex flex-col items-center">
+          <span className="loading loading-spinner loading-lg"></span>
+          <p className="mt-4">Loading vehicle details...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
