@@ -83,7 +83,7 @@ export default function HomePage() {
     async function fetchRoutes() {
       try {
         setRouteLoading(true);
-        const { data } = await api.get("/routes?page[limit]=20");
+        const { data } = await api.get("/routes");
         setRoutes(data.data);
       } catch (error) {
         console.error("Error fetching routes:", error);
@@ -100,7 +100,7 @@ export default function HomePage() {
       try {
         setTripLoading(true);
         const { data } = await api.get(
-          `/trips?filter[route]=${filter.routes}&page[limit]=20`
+          `/trips?filter[route]=${filter.routes}`
         );
         setTrips(data.data);
       } catch (error) {
@@ -177,7 +177,7 @@ export default function HomePage() {
         <select
           multiple={true}
           defaultValue={[]}
-          className="select h-auto"
+          className="select h-25"
           onChange={(e) => {
             setFilter({
               trips: [],
@@ -211,7 +211,7 @@ export default function HomePage() {
           <select
             multiple={true}
             defaultValue={[]}
-            className="select h-auto"
+            className="select h-25"
             onChange={(e) => {
               setFilter((prev) => ({
                 ...prev,
@@ -269,7 +269,7 @@ export default function HomePage() {
           </select>
           <p>
             Showing {page.offset + 1} to {page.offset + page.limit} of{" "}
-            {page.limit * getTotalPage()} data
+            {page.limit * getTotalPage()} vehicles
           </p>
           <div className="join">
             <button
